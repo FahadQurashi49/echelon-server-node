@@ -38,3 +38,5 @@ router.put('/facilities/:id', function (req, res, next) {
     res.send(facility);
   }).cathc(next);
 });
+
+module.exports = router;
