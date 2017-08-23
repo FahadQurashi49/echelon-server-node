@@ -9,7 +9,18 @@ const FacilitySchema = new Schema({
     maxlength: [30, 'Name must be of atmost 30 characters'],
     required: [true, 'Name feild is required']
   },
-  queues: [QueueSchema]
+  queues: {
+    type: [QueueSchema]
+  }
+});
+
+FacilitySchema.set('toJSON', {
+    transform: function(doc, ret, options) {
+        var retJson = {
+            name: ret.name,
+        };
+        return retJson;
+    }
 });
 
 const facility = mongoose.model('facility', FacilitySchema);
