@@ -17,7 +17,8 @@ const FacilitySchema = new Schema({
 FacilitySchema.set('toJSON', {
     transform: function(doc, ret, options) {
         var retJson = {
-            name: ret.name,
+            _id: ret._id,
+            name: ret.name
         };
         return retJson;
     }

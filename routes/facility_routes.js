@@ -2,6 +2,12 @@ const express = require('express');
 const router = express.Router();
 const Facility = require('../models/facility');
 
+router.get('/facilities/:id', function (req, res, next) {
+  Facility.findById(req.params.id).then(function(facility) {
+    res.json(facility);
+  }).catch(next);
+});
+
 router.get('/facilities', function (req, res, next){
   var pageOptions = {
     page: req.query.page || 0,

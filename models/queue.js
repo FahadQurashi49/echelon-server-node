@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
+const CustomerSchema = require('./customer');
 
 const QueueSchema = new Schema({
   name: {
@@ -19,6 +20,22 @@ const QueueSchema = new Schema({
   front: {
     type: Number,
     default: 0
+  },
+  customers: {
+    type: [CustomerSchema]
+  }
+});
+
+QueueSchema.set('toJSON', {
+  transform: function(doc, ret, options) {
+      var retJson = {
+          _id: ret._id,
+          name: ret.name,
+          isRunning: ret.isRunning,
+          rear: ret.rear,
+          front: ret.front
+      };
+      return retJson;
   }
 });
 
