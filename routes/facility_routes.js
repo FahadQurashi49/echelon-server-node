@@ -30,7 +30,7 @@ router.post('/facilities', function (req, res, next){
 
 //update a facility in db by ID
 router.put('/facilities/:id', function (req, res, next) {
-  Facility.findByIdAndUpdate({_id: req.params.id}, req.body).then(function (facility){
+  Facility.findByIdAndUpdate({_id: req.params.id}, req.body).then(function (){
     Facility.findOne({_id: req.params.id}).then(function (facility) {
       res.json(facility);
     });

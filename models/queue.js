@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
-const CustomerSchema = require('./customer');
+const CustomerSchema = require('./customer').CustomerSchema;
 
 const QueueSchema = new Schema({
   name: {

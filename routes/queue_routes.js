@@ -1,63 +1,50 @@
 const express = require('express');
 const router = express.Router();
 const Facility = require('../models/facility');
+const queueService = require('../services/queue_service');
 
 //get all queues
 // return paginated queues
 router.get('/facilities/:id/queues', function (req, res, next) {
-  var pageOptions = {
-    page: req.query.page || 0,
-    limit: req.query.limit || 10
-  };
-  var page = pageOptions.page * pageOptions.limit;
-  Facility.find({ _id: req.params.id },
-    { queues: { $slice: [0, 10] } })
-    .then(function (records) {
-      // as we specify id in find() 
-      // so there must be one record only
-      res.json(records[0].queues);
-    });
+  queueService.getAllQueues(req, res, next);
 });
 
 // get a queue
 router.get('/facilities/:id/queues/:queue_id', function (req, res, next) {
-  Facility.findById(req.params.id).then(function (facility) {
-    var queue = facility.queues.id(req.params.queue_id);
-    res.json(queue);
-  }).catch(next);
+  queueService.getQueue(req, res, next);
 });
 
 // add a new queue
 router.post('/facilities/:id/queues', function (req, res, next) {
-  Facility.findOne({ _id: req.params.id }).then(function (facility) {
-    var queue = facility.queues.create(req.body);
-    facility.queues.push(queue);
-    facility.save().then(function () {
-      Facility.findOne({ _id: req.params.id }).then(function (savedFacility) {
-        res.json(savedFacility.queues.id(queue._id));
-      });
-    });
-  });
+  queueService.addQueue(req, res, next);
 });
-
+// updates a queue by id
 router.put('/facilities/:id/queues/:queue_id', function (req, res, next) {
-  Facility.findById(req.params.id).then(function (facility) {
-    var queueId = req.params.queue_id;
-    var queue = facility.queues.id(queueId);
-    queue.set(req.body);
-    facility.save().then(function (savedFacility) {
-      res.json(savedFacility.queues.id(queueId));
-    }).catch(next);
-  }).catch(next);
+  queueService.updateQueue(req, res, next);
+});
+// deletes a queue by id
+router.delete('/facilities/:id/queues/:queue_id', function (req, res, next) {
+  queueService.deleteQueue(req, res, next);
 });
 
-router.delete('/facilities/:id/queues/:queue_id', function (req, res, next) {
-  Facility.findById(req.params.id).then(function (facility) {
-    facility.queues.id(req.params.queue_id).remove();
-    facility.save().then(function (savedFacility) {
-      res.json(savedFacility);
-    }).catch(next);
-  }).catch(next);
+/////////////////////////////////Business logic Requests\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
+// run a queue (means start/ initiate)
+router.get('/facilities/:id/queues/:queue_id/run', function (req, res, next) {
+  queueService.runQueue(req, res, next);
 });
+
+// cancel queue (means stop/finish) 
+router.get('/facilities/:id/queues/:queue_id/cancel', function (req, res, next) {
+ Facility.findById(req.params.id) .then(function (facility) {
+   var queue = facility.queues.id(req.params.queue_id);
+   queue.isRunning = false;
+   queue.rear = queue.front = 0;
+   // also remove all customers
+   facility.save().then(function (savedFacility) {
+    res.status(200).json(savedFacility.queues.id(req.params.queue_id));
+  });
+ });
+});
+
 
 module.exports = router;
