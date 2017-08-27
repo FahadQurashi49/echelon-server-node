@@ -23,7 +23,7 @@ app.use('/api', customerRouter);
 app.use(function (err, req, res, next) {
   var error = {
     error: err.message,
-    errorCode: err.errCode || ERROR_CODE,
+    errorCode: err.errorCode || ERROR_CODE,
     statusCode: err.statusCode || ERROR_CODE
   };   
   res.status(error.statusCode).json(error);
