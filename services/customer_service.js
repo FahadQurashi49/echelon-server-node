@@ -36,7 +36,7 @@ CustomerService.prototype.addCustomer = function (req, res, next) {
 CustomerService.prototype.updateCustomer = function (req, res, next) {
     var customer = req.body;
     ignoreCustomerFeilds(customer);
-    Customer.findByIdAndUpdate(req.params.id, customer).then(function () {        
+    Customer.findOneAndUpdate({ _id: req.params.id }, customer).then(function () {        
         Customer.findOne({ _id: req.params.id }).then(function (updatedCustomer) {
             customerException.customerNotFound(updatedCustomer);
             res.json(updatedCustomer);

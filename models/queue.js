@@ -39,4 +39,10 @@ QueueSchema.set('toJSON', {
   }
 });
 
+// Pre hook for `findOneAndUpdate`
+QueueSchema.pre('findOneAndUpdate', function(next) {
+  this.options.runValidators = true;
+  next();
+});
+
 module.exports = QueueSchema;

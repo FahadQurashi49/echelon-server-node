@@ -22,6 +22,13 @@ const CustomerSchema = new Schema({
 // https://stackoverflow.com/a/12574045/4233036
 CustomerSchema.index({ _id: 1, queueNumber: 1 }, { unique: true });
 
+// Pre hook for `findOneAndUpdate`
+CustomerSchema.pre('findOneAndUpdate', function (next) {
+    this.options.runValidators = true;
+    next();
+});
+
+
 const Customer = mongoose.model('customer', CustomerSchema);
 
 module.exports = { Customer, CustomerSchema };

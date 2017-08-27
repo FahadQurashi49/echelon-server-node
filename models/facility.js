@@ -24,6 +24,12 @@ FacilitySchema.set('toJSON', {
     }
 });
 
+// Pre hook for `findOneAndUpdate`
+FacilitySchema.pre('findOneAndUpdate', function(next) {
+  this.options.runValidators = true;
+  next();
+});
+
 const facility = mongoose.model('facility', FacilitySchema);
 
 module.exports = facility;
