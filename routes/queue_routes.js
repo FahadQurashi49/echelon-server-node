@@ -35,15 +35,7 @@ router.get('/facilities/:id/queues/:queue_id/run', function (req, res, next) {
 
 // cancel queue (means stop/finish) 
 router.get('/facilities/:id/queues/:queue_id/cancel', function (req, res, next) {
- Facility.findById(req.params.id) .then(function (facility) {
-   var queue = facility.queues.id(req.params.queue_id);
-   queue.isRunning = false;
-   queue.rear = queue.front = 0;
-   // also remove all customers
-   facility.save().then(function (savedFacility) {
-    res.status(200).json(savedFacility.queues.id(req.params.queue_id));
-  });
- });
+  queueService.cancelQueue(req, res, next);
 });
 
 
