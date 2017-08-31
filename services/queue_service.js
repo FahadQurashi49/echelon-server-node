@@ -1,8 +1,10 @@
+const _ = require('lodash');
 const Facility = require('../models/facility');
 const facilityExceptions = require('../exception/facility_exceptions');
 const queueExceptions = require('../exception/queue_exceptions');
 const PageOptions = require('./page_options');
-
+const Customer = require('../models/customer').Customer;
+const customerExceptions = require('../exception/customer_exception');
 function QueueService() {
 
 }
@@ -33,6 +35,7 @@ QueueService.prototype.updateQueue = function (req, res, next) {
     var queueId = req.params.queue_id;
     var queue = facility.queues.id(queueId);
     queueExceptions.queueNotFound(queue);
+    // http://mongoosejs.com/docs/api.html#document_Document-set
     queue.set(req.body);
     facility.save().then(function (savedFacility) {
       res.json(savedFacility.queues.id(queueId));
@@ -70,6 +73,7 @@ QueueService.prototype.getAllQueues = function (req, res, next) {
 /////////////////////////////////Business logic Requests\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
 
 QueueService.prototype.runQueue = function (req, res, next) {
+  
   Facility.findById(req.params.id).then(function (facility) {
     facilityExceptions.facilityNotFound(facility);
     var queue = facility.queues.id(req.params.queue_id);
@@ -87,18 +91,98 @@ QueueService.prototype.runQueue = function (req, res, next) {
 }
 
 QueueService.prototype.cancelQueue = function (req, res, next) {
+  getQueueByFacility(req, function (facility, queue) {
+    if (queue.isRunning) {
+      queue.cancelQueue(function () {
+        queue.set(queue);
+        facility.save().then(function (savedFacility) {
+          res.json(savedFacility.queues.id(req.params.queue_id));
+        });
+      }, next);
+    }
+  }, next);
+
+};
+
+QueueService.prototype.enqueueCustomer = function (req, res, next) {
+
+  getEntities(req, function (facility, queue, customer) {
+    queueExceptions.checkEnqueueConditions(queue, customer);
+    enqueueCustomerInQueue(queue, customer);
+
+    queue.set(queue);
+
+    saveEntities(facility, customer, function (savedFacility, savedCustomer) {
+      res.json(savedCustomer);
+    }, next);
+
+  }, next);
+};
+
+QueueService.prototype.dequeueCustomer = function (req, res, next) {
+
+  getEntities(req, function (facility, queue, customer) {
+    queueExceptions.checkDequeueConditions(queue, customer);
+    dequeueCustomerInQueue(queue, customer);
+    // update queue
+    queue.set(queue);
+
+    saveEntities(facility, customer, function (savedFacility, savedCustomer) {
+      res.json(savedCustomer);
+    }, next);
+  }, next);
+};
+
+QueueService.prototype.getAllQueueCustomers = function (req, res, next) {
+  Customer.find({ queue: req.params.queue_id }).then(function (customers) {
+    res.json(customers);
+  }).catch(next);
+};
+
+// support functions
+var getQueueByFacility = function (req, callback, next) {
   Facility.findById(req.params.id).then(function (facility) {
     facilityExceptions.facilityNotFound(facility);
     var queue = facility.queues.id(req.params.queue_id);
     queueExceptions.queueNotFound(queue);
-    queue.isRunning = false;
-    queue.rear = queue.front = 0;
-    // also remove all customers
-    facility.save().then(function (savedFacility) {
-      res.status(200).json(savedFacility.queues.id(req.params.queue_id));
-    });
-  });
-}
+    callback(facility, queue);
+  }).catch(next);
+};
+
+
+var getEntities = function (req, callback, next) {
+  getQueueByFacility(req, function (facility, queue) {
+    Customer.findById(req.params.customer_id).then(function (customer) {
+      customerExceptions.customerNotFound(customer);
+      callback(facility, queue, customer);
+    }).catch(next);
+  }, next);
+};
+
+var saveEntities = function (facility, customer, callback, next) {
+  facility.save().then(function (savedFacility) {
+    facilityExceptions.facilityNotSaved(savedFacility);
+    customer.save().then(function (savedCustomer) {
+      customerExceptions.customerNotSaved(savedCustomer);
+      callback(savedFacility, savedCustomer);
+    }).catch(next);
+  }).catch(next);
+};
+
+var enqueueCustomerInQueue = function (queue, customer) {
+  queue.rear++;
+  customer.isInQueue = true;
+  customer.queueNumber = queue.rear;
+  customer.queue = queue._id;
+};
+
+var dequeueCustomerInQueue = function (queue, customer) {
+  customer.queueNumber = 0;
+  customer.isInQueue = false;
+  customer.queue = null;
+  queue.front++;
+};
+
 
 var queueService = new QueueService();
 

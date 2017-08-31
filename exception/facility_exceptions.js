@@ -11,4 +11,10 @@ FacilityExceptions.prototype.facilityNotFound = function (facility) {
     }
 }
 
+FacilityExceptions.prototype.facilityNotSaved = function (facility) {
+    if (!facility) {
+        throw new EchelonError(500, "Cannot save facility");
+    }
+}
+
 module.exports = new FacilityExceptions();

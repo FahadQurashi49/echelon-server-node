@@ -38,5 +38,16 @@ router.get('/facilities/:id/queues/:queue_id/cancel', function (req, res, next) 
   queueService.cancelQueue(req, res, next);
 });
 
+// enqueue a customer in queue 
+router.get('/facilities/:id/queues/:queue_id/customers/:customer_id/enqueue', function (req, res, next) {
+  queueService.enqueueCustomer(req, res, next);
+});
+router.get('/facilities/:id/queues/:queue_id/customers', function (req, res, next) {
+  queueService.getAllQueueCustomers(req, res, next);
+});
+// dequeue a customer in queue 
+router.get('/facilities/:id/queues/:queue_id/customers/:customer_id/dequeue', function (req, res, next) {
+  queueService.dequeueCustomer(req, res, next);
+});
 
 module.exports = router;

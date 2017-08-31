@@ -15,12 +15,14 @@ const CustomerSchema = new Schema({
     isInQueue: {
         type: Boolean,
         default: false
-    }
+    },
+    // http://mongoosejs.com/docs/populate.html
+    queue: { type: Schema.Types.ObjectId, ref: 'facility.queues'}
 });
 
 // unique composite column
 // https://stackoverflow.com/a/12574045/4233036
-CustomerSchema.index({ _id: 1, queueNumber: 1 }, { unique: true });
+// CustomerSchema.index({ _id: 1, queueNumber: 1 }, { unique: true });
 
 // Pre hook for `findOneAndUpdate`
 CustomerSchema.pre('findOneAndUpdate', function (next) {
