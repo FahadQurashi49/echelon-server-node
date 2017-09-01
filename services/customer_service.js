@@ -26,7 +26,7 @@ CustomerService.prototype.getCustomer = function (req, res, next) {
 };
 // add a new customer
 CustomerService.prototype.addCustomer = function (req, res, next) {
-    const customer = req.body;
+    var customer = req.body;
     ignoreCustomerFeilds(customer);
     Customer.create(customer).then(function (savedCustomer) {
         res.json(savedCustomer);

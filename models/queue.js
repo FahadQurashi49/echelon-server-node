@@ -26,7 +26,11 @@ const QueueSchema = new Schema({
     default: 0
   }
 });
-
+QueueSchema.statics.ignoreFields = function (queue) {
+  delete queue.isRunning;
+  delete queue.rear;
+  delete queue.front;
+}
 
 QueueSchema.methods.saveQueue = function (facility, cb, next) {
   var queueId = this._id;
