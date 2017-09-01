@@ -1,7 +1,10 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
+const Facility = require('./facility');
 const CustomerSchema = require('./customer').CustomerSchema;
 const Customer = require('./customer').Customer;
+const facilityExceptions = require('../exception/facility_exceptions');
+const queueExceptions = require('../exception/queue_exceptions');
 
 const QueueSchema = new Schema({
   name: {
@@ -21,54 +24,68 @@ const QueueSchema = new Schema({
   front: {
     type: Number,
     default: 0
-  },
-  customers: {
-    type: [CustomerSchema]
   }
 });
+
+
+QueueSchema.methods.saveQueue = function (facility, cb, next) {
+  var queueId = this._id;
+  facility.save().then(function (savedFacility) {
+    facilityExceptions.facilityNotSaved(savedFacility);    
+    cb(savedFacility.queues.id(queueId));
+  }).catch(next);
+}
+
+
 QueueSchema.methods.runQueue = function () {
-  
+  this.isRunning = true;
 };
 
-// in progress
+
 QueueSchema.methods.cancelQueue = function (cb, next) {
   this.isRunning = false;
   this.rear = this.front = 0;
   // update all customers where queue._id = this._id
   // set queue = null, isInQueue=false, queueNumber=0
   Customer.update(
-    {"queue": this._id},
-    {$set: {"queue": null, "isInQueue": false, "queueNumber": 0}},
-    {"multi": true}, function (err, raw) {
-      if (err) { return next(err);}
+    { "queue": this._id },
+    { $set: { "queue": null, "isInQueue": false, "queueNumber": 0 } },
+    { "multi": true }, function (err, raw) {
+      if (err) { return next(err); }
       cb();
     }
   );
 };
 
-QueueSchema.methods.enqueueCustomer = function () {
-  
+QueueSchema.methods.enqueueCustomer = function (customer) {
+  this.rear++;
+  customer.isInQueue = true;
+  customer.queueNumber = this.rear;
+  customer.queue = this._id;
 };
 
-QueueSchema.dequeueCustomer = function () {
-  
+QueueSchema.methods.dequeueCustomer = function (customer) {
+  customer.queueNumber = 0;
+  customer.isInQueue = false;
+  customer.queue = null;
+  this.front++;
 };
 
 QueueSchema.set('toJSON', {
-  transform: function(doc, ret, options) {
-      var retJson = {
-          _id: ret._id,
-          name: ret.name,
-          isRunning: ret.isRunning,
-          rear: ret.rear,
-          front: ret.front
-      };
-      return retJson;
+  transform: function (doc, ret, options) {
+    var retJson = {
+      _id: ret._id,
+      name: ret.name,
+      isRunning: ret.isRunning,
+      rear: ret.rear,
+      front: ret.front
+    };
+    return retJson;
   }
 });
 
 // Pre hook for `findOneAndUpdate`
-QueueSchema.pre('findOneAndUpdate', function(next) {
+QueueSchema.pre('findOneAndUpdate', function (next) {
   this.options.runValidators = true;
   next();
 });

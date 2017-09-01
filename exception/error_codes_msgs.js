@@ -25,6 +25,16 @@ const queue = {
             code: "254",
             msg: "Customer number not yet come"
         }
+    },
+    queueRun: {  //6
+        notRunning: { //1
+            code: "261",
+            msg: "Queue not running"
+        },
+        alreadyRunning: { //2
+            code: "262",
+            msg: "Queue already running"
+        }
     }
 }
 

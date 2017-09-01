@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
+const PageOptions = require('../services/page_options');
 
 const CustomerSchema = new Schema({
     name: {
@@ -19,6 +20,16 @@ const CustomerSchema = new Schema({
     // http://mongoosejs.com/docs/populate.html
     queue: { type: Schema.Types.ObjectId, ref: 'facility.queues'}
 });
+
+CustomerSchema.statics.findByQueueId = function (req, callback, next) {
+    var pageOptions = new PageOptions(req);
+    Customer.find({ queue: req.params.queue_id })
+    .skip(pageOptions.page)
+    .limit(pageOptions.limit)
+    .exec().then(function (customers) {
+      callback(customers);
+    }).catch(next);
+}
 
 // unique composite column
 // https://stackoverflow.com/a/12574045/4233036
