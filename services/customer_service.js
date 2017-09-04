@@ -15,6 +15,9 @@ function ignoreCustomerFeilds(customer) {
         if (customer.queueNumber) {
             delete customer.queueNumber;
         }
+        if (customer.queue) {
+            delete customer.queue;
+        }
     }
 }
 // get a customer by ID

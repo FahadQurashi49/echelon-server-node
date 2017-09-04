@@ -53,7 +53,7 @@ QueueSchema.methods.cancelQueue = function (cb, next) {
   // set queue = null, isInQueue=false, queueNumber=0
   Customer.update(
     { "queue": this._id },
-    { $set: { "queue": null, "isInQueue": false, "queueNumber": 0 } },
+    { $unset: {queue: 1, queueNumber: 1}, $set: {"isInQueue": false} },
     { "multi": true }, function (err, raw) {
       if (err) { return next(err); }
       cb();
@@ -69,9 +69,9 @@ QueueSchema.methods.enqueueCustomer = function (customer) {
 };
 
 QueueSchema.methods.dequeueCustomer = function (customer) {
-  customer.queueNumber = 0;
+  customer.queueNumber = undefined;
   customer.isInQueue = false;
-  customer.queue = null;
+  customer.queue = undefined;
   this.front++;
 };
 

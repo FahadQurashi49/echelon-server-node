@@ -10,8 +10,7 @@ const CustomerSchema = new Schema({
         required: [true, 'Name feild is required']
     },
     queueNumber: {
-        type: Number,
-        default: 0
+        type: Number
     },
     isInQueue: {
         type: Boolean,
@@ -33,7 +32,8 @@ CustomerSchema.statics.findByQueueId = function (req, callback, next) {
 
 // unique composite column
 // https://stackoverflow.com/a/12574045/4233036
-// CustomerSchema.index({ _id: 1, queueNumber: 1 }, { unique: true });
+//change this to partial index https://docs.mongodb.com/manual/core/index-partial/#create-a-partial-index
+CustomerSchema.index({ queue: 1, queueNumber: 1 }, { unique: true, sparse: true });
 
 // Pre hook for `findOneAndUpdate`
 CustomerSchema.pre('findOneAndUpdate', function (next) {
