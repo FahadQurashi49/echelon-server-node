@@ -32,8 +32,15 @@ CustomerSchema.statics.findByQueueId = function (req, callback, next) {
 
 // unique composite column
 // https://stackoverflow.com/a/12574045/4233036
-//change this to partial index https://docs.mongodb.com/manual/core/index-partial/#create-a-partial-index
-CustomerSchema.index({ queue: 1, queueNumber: 1 }, { unique: true, sparse: true });
+//partial index https://docs.mongodb.com/manual/core/index-partial/#comparison-with-the-sparse-index
+CustomerSchema.index({ queue: 1, queueNumber: 1 },
+    {
+        unique: true,
+        partialFilterExpression: { 
+            queue: { $exists: true }, 
+            queueNumber: { $exists: true } 
+        }
+    });
 
 // Pre hook for `findOneAndUpdate`
 CustomerSchema.pre('findOneAndUpdate', function (next) {
