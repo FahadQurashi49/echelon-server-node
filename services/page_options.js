@@ -1,8 +1,10 @@
  function PageOptions (req) {
      if (req) {
-        var page = req.query.page || 0;
-        this.page = page * req.query.limit;
-        this.limit = req.query.limit || 10
+        var page = parseInt(req.query.page) || 0;
+        var limit = parseInt(req.query.limit) || 10;
+
+        this.page = page * limit;
+        this.limit = limit;
      }
  }
 
