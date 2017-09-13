@@ -13,7 +13,7 @@ const app = express();
 app.use(bodyParser.json());
 
 // connect to mongodb
-mongoose.connect('mongodb://localhost/echelon', {useMongoClient: true});
+mongoose.connect('mongodb://localhost/echelon2', {useMongoClient: true});
 mongoose.Promise = global.Promise;
 // initialize routes
 app.use('/api', facilityRouter);

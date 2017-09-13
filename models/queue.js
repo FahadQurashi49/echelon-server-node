@@ -24,13 +24,30 @@ const QueueSchema = new Schema({
   front: {
     type: Number,
     default: 0
+  },
+   // http://mongoosejs.com/docs/populate.html
+   facility: { 
+     type: Schema.Types.ObjectId,
+     ref: 'facility',
+     required: [true, 'Queue cannot exists without facility']
   }
 });
-QueueSchema.statics.ignoreFields = function (queue) {
-  delete queue.isRunning;
-  delete queue.rear;
-  delete queue.front;
-}
+
+QueueSchema.statics.getQueueByFacility = function (req, callback, next) {
+  Queue.find({_id: req.params.queue_id, facility: req.params.id})
+  .exec().then(function (queues) {
+    var queue = queues[0];
+    queueExceptions.queueNotFound(queue);
+    callback(queue);
+  }).catch(next);
+
+ /*  Facility.findById(req.params.id).then(function (facility) {
+    facilityExceptions.facilityNotFound(facility);
+    var queue = facility.queues.id(req.params.queue_id);
+    queueExceptions.queueNotFound(queue);
+    callback(facility, queue);
+  }).catch(next); */
+};
 
 QueueSchema.methods.saveQueue = function (facility, cb, next) {
   var queueId = this._id;
@@ -75,23 +92,24 @@ QueueSchema.methods.dequeueCustomer = function (customer) {
   this.front++;
 };
 
-QueueSchema.set('toJSON', {
+/* QueueSchema.set('toJSON', {
   transform: function (doc, ret, options) {
     var retJson = {
       _id: ret._id,
       name: ret.name,
       isRunning: ret.isRunning,
       rear: ret.rear,
-      front: ret.front
+      front: ret.front,
+
     };
     return retJson;
   }
-});
+}); */
 
 // Pre hook for `findOneAndUpdate`
 QueueSchema.pre('findOneAndUpdate', function (next) {
   this.options.runValidators = true;
   next();
 });
-
-module.exports = QueueSchema;
+const Queue = mongoose.model('queue', QueueSchema);
+module.exports = Queue;

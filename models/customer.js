@@ -17,7 +17,7 @@ const CustomerSchema = new Schema({
         default: false
     },
     // http://mongoosejs.com/docs/populate.html
-    queue: { type: Schema.Types.ObjectId, ref: 'facility.queues'}
+    queue: { type: Schema.Types.ObjectId, ref: 'queue'}
 });
 
 CustomerSchema.statics.findByQueueId = function (req, callback, next) {

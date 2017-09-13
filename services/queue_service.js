@@ -5,35 +5,51 @@ const queueExceptions = require('../exception/queue_exceptions');
 const PageOptions = require('./page_options');
 const Customer = require('../models/customer').Customer;
 const customerExceptions = require('../exception/customer_exception');
+const Queue = require('../models/queue');
 function QueueService() {
 
 }
 
 QueueService.prototype.addQueue = function (req, res, next) {
   Facility.findOne({ _id: req.params.id }).then(function (facility) {
-    facilityExceptions.facilityNotFound(facility);    
-    var queue = facility.queues.create(ignoreQueueFields(req.body));
+    facilityExceptions.facilityNotFound(facility);
+    var queue = ignoreQueueFields(req.body);
+    queue.facility = facility._id;
+    Queue.create(queue).then(function (savedQueue) {
+      res.json(savedQueue);
+    }).catch(next);
+    /* var queue = facility.queues.create(ignoreQueueFields(req.body));
     facility.queues.push(queue);
     queue.saveQueue(facility, function (savedQueue) {
       res.json(savedQueue);
-    }, next);
+    }, next); */
   }).catch(next);
 }
 
 QueueService.prototype.getQueue = function (req, res, next) {
-  getQueueByFacility(req, function (facility, queue) {
+  Queue.getQueueByFacility(req, function (queue) {
     res.json(queue);
   }, next);
 }
 
 QueueService.prototype.updateQueue = function (req, res, next) {
-  getQueueByFacility(req, function (facility, queue) {           
-    // http://mongoosejs.com/docs/api.html#document_Document-set  
+  Queue.findOneAndUpdate({
+    _id: req.params.queue_id,
+    facility: req.params.id
+  }, ignoreQueueFields(req.body)).then(function (queue) {
+    queueExceptions.queueNotFound(queue);
+    Queue.findOne({ _id: req.params.queue_id }).then(function (updatedQueue) {
+      res.json(updatedQueue);
+    }).catch(next);
+  }).catch(next);
+
+  /* Queue.getQueueByFacility(req, function (queue) {           
+    // http://mongoosejs.com/docs/api.html#document_Document-set
     queue.set(ignoreQueueFields(req.body));
     queue.saveQueue(facility, function (savedQueue) {
       res.json(savedQueue);
     }, next);
-  }, next);
+  }, next); */
 }
 
 QueueService.prototype.deleteQueue = function (req, res, next) {
@@ -126,20 +142,15 @@ QueueService.prototype.getAllQueueCustomers = function (req, res, next) {
 };
 
 // support functions
-var getQueueByFacility = function (req, callback, next) {
-  Facility.findById(req.params.id).then(function (facility) {
-    facilityExceptions.facilityNotFound(facility);
-    var queue = facility.queues.id(req.params.queue_id);
-    queueExceptions.queueNotFound(queue);
-    callback(facility, queue);
-  }).catch(next);
-};
+
 
 var ignoreQueueFields = function (queue) {
   if (queue) {
+    delete queue._id;
     delete queue.isRunning;
     delete queue.rear;
     delete queue.front;
+    delete queue.facility;
   }
   return queue;
 };
