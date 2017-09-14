@@ -18,11 +18,6 @@ QueueService.prototype.addQueue = function (req, res, next) {
     Queue.create(queue).then(function (savedQueue) {
       res.json(savedQueue);
     }).catch(next);
-    /* var queue = facility.queues.create(ignoreQueueFields(req.body));
-    facility.queues.push(queue);
-    queue.saveQueue(facility, function (savedQueue) {
-      res.json(savedQueue);
-    }, next); */
   }).catch(next);
 }
 
@@ -42,63 +37,47 @@ QueueService.prototype.updateQueue = function (req, res, next) {
       res.json(updatedQueue);
     }).catch(next);
   }).catch(next);
-
-  /* Queue.getQueueByFacility(req, function (queue) {           
-    // http://mongoosejs.com/docs/api.html#document_Document-set
-    queue.set(ignoreQueueFields(req.body));
-    queue.saveQueue(facility, function (savedQueue) {
-      res.json(savedQueue);
-    }, next);
-  }, next); */
 }
 
 QueueService.prototype.deleteQueue = function (req, res, next) {
-  getQueueByFacility(req, function (facility, queue) {    
-    // http://mongoosejs.com/docs/api.html#document_Document-set
-    queue.remove();
-    facility.save().then(function (savedFacility) {
-      res.json(savedFacility);
-    });
-  }, next);
+  Queue.findByIdAndRemove({
+    _id: req.params.queue_id
+  }).then(function (queue) {
+    queueExceptions.queueNotFound(queue);
+    res.json(queue);
+  }).catch(next);
 }
 
 QueueService.prototype.getAllQueues = function (req, res, next) {
-  var pageOptions = new PageOptions(req);
-  Facility.find({ _id: req.params.id },
-    { queues: { $slice: [pageOptions.page, pageOptions.limit] } })
-    .then(function (facilities) {         
-      if (facilities.length === 0) {
-        // this means facility not found
-        facilityExceptions.facilityNotFound();
-      }
-      // as we specify id in find() 
-      // so there must be one record only 
-      res.json(facilities[0].queues);
-    }).catch(next);
+  // add pagination
+  Queue.find({facility: req.params.id}).then(function (queues) {
+    res.json(queues);
+  }).catch(next);
 }
 
 /////////////////////////////////Business logic Requests\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
 
 QueueService.prototype.runQueue = function (req, res, next) {
 
-  getQueueByFacility(req, function (facility, queue) {
+  Queue.getQueueByFacility(req, function (queue) {
     // if it is already running send conflict error 409
     queueExceptions.queueAlreadyRunning(queue);
     queue.runQueue();
-    queue.saveQueue(facility, function (savedQueue) {
-      res.json(savedQueue);
-    });
+    queue.save().then(function (savedQueue) {
+      queueExceptions.queueNotFound(savedQueue);
+      res.json(savedQueue)
+    }).catch(next);
   }, next);
 }
 
 QueueService.prototype.cancelQueue = function (req, res, next) {
-  getQueueByFacility(req, function (facility, queue) {
+  Queue.getQueueByFacility(req, function (queue) {
     queueExceptions.queueNotRunning(queue);
     queue.cancelQueue(function () {
-      // queue.set(queue);
-      queue.saveQueue(facility, function (savedQueue) {
-        res.json(savedQueue);
-      }, next);
+      queue.save().then(function (savedQueue) {
+        queueExceptions.queueNotFound(savedQueue);
+        res.json(savedQueue)
+      }).catch(next);
     }, next);
   }, next);
 
@@ -106,11 +85,10 @@ QueueService.prototype.cancelQueue = function (req, res, next) {
 
 QueueService.prototype.enqueueCustomer = function (req, res, next) {
 
-  getEntities(req, function (facility, queue, customer) {
+  getEntities(req, function (queue, customer) {
     queueExceptions.checkEnqueueConditions(queue, customer);
-    queue.enqueueCustomer(customer);    
-    // queue.set(queue);
-    saveEntities(facility, customer, function (savedFacility, savedCustomer) {
+    queue.enqueueCustomer(customer);
+    saveEntities(queue, customer, function (savedQueue, savedCustomer) {
       res.json(savedCustomer);
     }, next);
 
@@ -119,20 +97,20 @@ QueueService.prototype.enqueueCustomer = function (req, res, next) {
 
 QueueService.prototype.dequeueCustomer = function (req, res, next) {
 
-  getEntities(req, function (facility, queue, customer) {
+  getEntities(req, function (queue, customer) {
     queueExceptions.checkDequeueConditions(queue, customer);
     queue.dequeueCustomer(customer);
     // update queue
     // queue.set(queue);
 
-    saveEntities(facility, customer, function (savedFacility, savedCustomer) {
+    saveEntities(queue, customer, function (savedQueue, savedCustomer) {
       res.json(savedCustomer);
     }, next);
   }, next);
 };
 
 QueueService.prototype.getAllQueueCustomers = function (req, res, next) {
-  getQueueByFacility(req, function (facility, queue) {
+  Queue.getQueueByFacility(req, function (queue) {
     queueExceptions.queueNotRunning(queue);
     Customer.findByQueueId(req, function (customers) {
       res.json(customers);
@@ -157,20 +135,20 @@ var ignoreQueueFields = function (queue) {
 
 
 var getEntities = function (req, callback, next) {
-  getQueueByFacility(req, function (facility, queue) {
+  Queue.getQueueByFacility(req, function (queue) {
     Customer.findById(req.params.customer_id).then(function (customer) {
       customerExceptions.customerNotFound(customer);
-      callback(facility, queue, customer);
+      callback(queue, customer);
     }).catch(next);
   }, next);
 };
 
-var saveEntities = function (facility, customer, callback, next) {
-  facility.save().then(function (savedFacility) {
-    facilityExceptions.facilityNotSaved(savedFacility);
+var saveEntities = function (queue, customer, callback, next) {
+  queue.save().then(function (savedQueue) {
+    queueExceptions.queueNotSaved(savedQueue);
     customer.save().then(function (savedCustomer) {
       customerExceptions.customerNotSaved(savedCustomer);
-      callback(savedFacility, savedCustomer);
+      callback(savedQueue, savedCustomer);
     }).catch(next);
   }).catch(next);
 };

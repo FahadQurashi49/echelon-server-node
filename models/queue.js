@@ -40,23 +40,7 @@ QueueSchema.statics.getQueueByFacility = function (req, callback, next) {
     queueExceptions.queueNotFound(queue);
     callback(queue);
   }).catch(next);
-
- /*  Facility.findById(req.params.id).then(function (facility) {
-    facilityExceptions.facilityNotFound(facility);
-    var queue = facility.queues.id(req.params.queue_id);
-    queueExceptions.queueNotFound(queue);
-    callback(facility, queue);
-  }).catch(next); */
 };
-
-QueueSchema.methods.saveQueue = function (facility, cb, next) {
-  var queueId = this._id;
-  facility.save().then(function (savedFacility) {
-    facilityExceptions.facilityNotSaved(savedFacility);    
-    cb(savedFacility.queues.id(queueId));
-  }).catch(next);
-}
-
 
 QueueSchema.methods.runQueue = function () {
   this.isRunning = true;
