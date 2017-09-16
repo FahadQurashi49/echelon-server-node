@@ -2,7 +2,6 @@ const _ = require('lodash');
 const Facility = require('../models/facility');
 const facilityExceptions = require('../exception/facility_exceptions');
 const queueExceptions = require('../exception/queue_exceptions');
-const PageOptions = require('./page_options');
 const Customer = require('../models/customer').Customer;
 const customerExceptions = require('../exception/customer_exception');
 const Queue = require('../models/queue');

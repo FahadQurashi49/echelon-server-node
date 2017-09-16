@@ -1,6 +1,5 @@
 const Facility = require('../models/facility');
 const facilityException = require('../exception/facility_exceptions');
-const PageOptions = require('./page_options');
 
 function FacilityService() {
 
@@ -18,13 +17,6 @@ FacilityService.prototype.getAllFacilities = function (req, res, next) {
     Facility.paginate({}, {page: 1, limit: 10}).then(function (result) {
         res.json(result);
     }).catch(next);
-    /* var pageOptions = new PageOptions(req);
-    Facility.find()
-        .skip(pageOptions.page)
-        .limit(pageOptions.limit)
-        .exec().then(function (facilities) {
-            res.json(facilities);
-        }).catch(next); */
 }
 
 // add a new facility

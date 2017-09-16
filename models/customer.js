@@ -1,6 +1,5 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
-const PageOptions = require('../services/page_options');
 const mongoosePaginate = require('mongoose-paginate');
 
 const CustomerSchema = new Schema({
