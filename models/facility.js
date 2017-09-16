@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 const QueueSchema = require('./queue');
+const mongoosePaginate = require('mongoose-paginate');
 
 const FacilitySchema = new Schema({
   name: {
@@ -10,6 +11,7 @@ const FacilitySchema = new Schema({
     required: [true, 'Name feild is required']
   }
 });
+FacilitySchema.plugin(mongoosePaginate);
 
 FacilitySchema.set('toJSON', {
     transform: function(doc, ret, options) {

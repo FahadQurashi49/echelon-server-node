@@ -15,13 +15,16 @@ FacilityService.prototype.getFacility = function (req, res, next) {
 
 // get all facilities
 FacilityService.prototype.getAllFacilities = function (req, res, next) {
-    var pageOptions = new PageOptions(req);
+    Facility.paginate({}, {page: 1, limit: 10}).then(function (result) {
+        res.json(result);
+    }).catch(next);
+    /* var pageOptions = new PageOptions(req);
     Facility.find()
         .skip(pageOptions.page)
         .limit(pageOptions.limit)
         .exec().then(function (facilities) {
             res.json(facilities);
-        }).catch(next);
+        }).catch(next); */
 }
 
 // add a new facility

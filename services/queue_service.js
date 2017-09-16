@@ -49,10 +49,14 @@ QueueService.prototype.deleteQueue = function (req, res, next) {
 }
 
 QueueService.prototype.getAllQueues = function (req, res, next) {
-  // add pagination
-  Queue.find({facility: req.params.id}).then(function (queues) {
-    res.json(queues);
+  
+  Queue.paginate({facility: req.params.id}, { 
+    page: parseInt(req.query.page) || 1, 
+    limit: parseInt(req.query.limit) || 10 
+  }).then(function (result) {
+    res.json(result);
   }).catch(next);
+
 }
 
 /////////////////////////////////Business logic Requests\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\

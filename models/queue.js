@@ -5,6 +5,7 @@ const CustomerSchema = require('./customer').CustomerSchema;
 const Customer = require('./customer').Customer;
 const facilityExceptions = require('../exception/facility_exceptions');
 const queueExceptions = require('../exception/queue_exceptions');
+var mongoosePaginate = require('mongoose-paginate');
 
 const QueueSchema = new Schema({
   name: {
@@ -32,6 +33,8 @@ const QueueSchema = new Schema({
      required: [true, 'Queue cannot exists without facility']
   }
 });
+
+QueueSchema.plugin(mongoosePaginate);
 
 QueueSchema.statics.getQueueByFacility = function (req, callback, next) {
   Queue.find({_id: req.params.queue_id, facility: req.params.id})
