@@ -116,8 +116,8 @@ QueueService.prototype.dequeueCustomer = function (req, res, next) {
 QueueService.prototype.getAllQueueCustomers = function (req, res, next) {
   Queue.getQueueByFacility(req, function (queue) {
     queueExceptions.queueNotRunning(queue);
-    Customer.findByQueueId(req, function (customers) {
-      res.json(customers);
+    Customer.findByQueueId(req, function (results) {
+      res.json(results);
     }, next)
   }, next);
   

@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 const PageOptions = require('../services/page_options');
+const mongoosePaginate = require('mongoose-paginate');
 
 const CustomerSchema = new Schema({
     name: {
@@ -20,13 +21,14 @@ const CustomerSchema = new Schema({
     queue: { type: Schema.Types.ObjectId, ref: 'queue'}
 });
 
+CustomerSchema.plugin(mongoosePaginate);
+
 CustomerSchema.statics.findByQueueId = function (req, callback, next) {
-    var pageOptions = new PageOptions(req);
-    Customer.find({ queue: req.params.queue_id })
-    .skip(pageOptions.page)
-    .limit(pageOptions.limit)
-    .exec().then(function (customers) {
-      callback(customers);
+    Customer.paginate({queue: req.params.queue_id}, {
+        page: req.query.page || 1,
+        limit: req.query.limit || 10
+    }).then(function (result) {
+        callback(result);
     }).catch(next);
 }
 
