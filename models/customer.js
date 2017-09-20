@@ -24,8 +24,8 @@ CustomerSchema.plugin(mongoosePaginate);
 
 CustomerSchema.statics.findByQueueId = function (req, callback, next) {
     Customer.paginate({queue: req.params.queue_id}, {
-        page: req.query.page || 1,
-        limit: req.query.limit || 10
+        page: parseInt(req.query.page) || 1, 
+        limit: parseInt(req.query.limit) || 10 
     }).then(function (result) {
         callback(result);
     }).catch(next);

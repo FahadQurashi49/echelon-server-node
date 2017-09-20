@@ -14,7 +14,10 @@ FacilityService.prototype.getFacility = function (req, res, next) {
 
 // get all facilities
 FacilityService.prototype.getAllFacilities = function (req, res, next) {
-    Facility.paginate({}, {page: 1, limit: 10}).then(function (result) {
+    Facility.paginate({}, {
+        page: parseInt(req.query.page) || 1, 
+        limit: parseInt(req.query.limit) || 10 
+    }).then(function (result) {
         res.json(result);
     }).catch(next);
 }
