@@ -48,7 +48,7 @@ router.get('/facilities/:id/queues/:queue_id/customers', function (req, res, nex
 
 // get customer on front of queue
 router.get('/facilities/:id/queues/:queue_id/front', function (req, res, next) {
-  queueService.getFrontCustomers(req, res, next);
+  queueService.getFrontCustomer(req, res, next);
 });
 
 // dequeue a customer in front
