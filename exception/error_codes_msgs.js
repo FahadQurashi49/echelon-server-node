@@ -24,6 +24,10 @@ const queue = {
         not_in_front: {
             code: "254",
             msg: "Customer number not yet come"
+        },
+        empty_queue: {
+            code: "255",
+            msg: "Queue is empty"
         }
     },
     queueRun: {  //6

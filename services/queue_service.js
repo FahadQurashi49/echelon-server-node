@@ -98,10 +98,34 @@ QueueService.prototype.enqueueCustomer = function (req, res, next) {
   }, next);
 };
 
+QueueService.prototype.getFrontCustomer = function (req, res, next) {
+  Queue.getQueueByFacility(req, function (queue) {
+    queueExceptions.checkDequeueConditions(queue);
+    Customer.findByQueueIdAndQueueNumber(queue, function (customer) {
+      res.json(customer);
+    });
+    
+  }, next);
+};
+
 QueueService.prototype.dequeueCustomer = function (req, res, next) {
+  Queue.getQueueByFacility(req, function (queue) {
+    queueExceptions.checkDequeueConditions(queue);
+    Customer.findByQueueIdAndQueueNumber(queue, function (customer) {
+      queue.dequeueCustomer(customer);
+
+      saveEntities(queue, customer, function (savedQueue, savedCustomer) {
+        res.json(savedCustomer);
+      }, next);
+    });
+    
+  }, next);
+};
+
+QueueService.prototype.dequeueCustomerById = function (req, res, next) {
 
   getEntities(req, function (queue, customer) {
-    queueExceptions.checkDequeueConditions(queue, customer);
+    queueExceptions.checkDequeueByCustomerConditions(queue, customer);
     queue.dequeueCustomer(customer);
     // update queue
     // queue.set(queue);
@@ -155,7 +179,6 @@ var saveEntities = function (queue, customer, callback, next) {
     }).catch(next);
   }).catch(next);
 };
-
 
 
 var queueService = new QueueService();

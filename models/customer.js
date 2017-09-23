@@ -29,6 +29,20 @@ CustomerSchema.statics.findByQueueId = function (req, callback, next) {
     }).then(function (result) {
         callback(result);
     }).catch(next);
+};
+
+CustomerSchema.statics.queueCustomersCount = function (req, callback, next) {
+    Customer.count({queue: req.params.queue_id}).exec().then(function (count) {
+        callback(count);
+    }).catch(next);
+}
+
+CustomerSchema.statics.findByQueueIdAndQueueNumber = function (queue, callback, next) {
+    Customer.find({queueNumber: queue.front+1, queue: queue._id})
+    .exec().then(function (results) {
+        var customer = results[0];
+        callback(customer);
+    }).catch(next);
 }
 
 // unique composite column

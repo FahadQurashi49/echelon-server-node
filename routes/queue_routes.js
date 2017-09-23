@@ -45,9 +45,20 @@ router.get('/facilities/:id/queues/:queue_id/customers/:customer_id/enqueue', fu
 router.get('/facilities/:id/queues/:queue_id/customers', function (req, res, next) {
   queueService.getAllQueueCustomers(req, res, next);
 });
-// dequeue a customer in queue 
-router.get('/facilities/:id/queues/:queue_id/customers/:customer_id/dequeue', function (req, res, next) {
+
+// get customer on front of queue
+router.get('/facilities/:id/queues/:queue_id/front', function (req, res, next) {
+  queueService.getFrontCustomers(req, res, next);
+});
+
+// dequeue a customer in front
+router.get('/facilities/:id/queues/:queue_id/dequeue', function (req, res, next) {
   queueService.dequeueCustomer(req, res, next);
+});
+
+// dequeue a customer by id in queue 
+router.get('/facilities/:id/queues/:queue_id/customers/:customer_id/dequeue', function (req, res, next) {
+  queueService.dequeueCustomerById(req, res, next);
 });
 
 module.exports = router;

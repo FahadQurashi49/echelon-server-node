@@ -46,7 +46,19 @@ QueueExceptions.prototype.checkEnqueueConditions = function (queue, customer) {
     return false;
 }
 
-QueueExceptions.prototype.checkDequeueConditions = function (queue, customer) {
+QueueExceptions.prototype.checkDequeueConditions = function (queue) {
+    var dequeueCodesMsgs = queueCodesAndMsgs.dequeue;
+    queueExceptions.queueNotRunning(queue);
+
+    if (queue.rear === queue.front) {
+        throw new EchelonError(409,
+            dequeueCodesMsgs.empty_queue.msg,
+            dequeueCodesMsgs.empty_queue.code);
+    }
+    return false;
+}
+
+QueueExceptions.prototype.checkDequeueByCustomerConditions = function (queue, customer) {
     var dequeueCodesMsgs = queueCodesAndMsgs.dequeue;
     queueExceptions.queueNotRunning(queue);
     if (customer.isInQueue && customer.queue && customer.queue.equals(queue._id)) {
