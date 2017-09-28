@@ -66,6 +66,7 @@ QueueSchema.methods.cancelQueue = function (cb, next) {
 };
 
 QueueSchema.methods.enqueueCustomer = function (customer) {
+  queueExceptions.checkEnqueueConditions(this, customer);
   this.rear++;
   customer.isInQueue = true;
   customer.queueNumber = this.rear;

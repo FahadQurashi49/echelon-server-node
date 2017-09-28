@@ -42,6 +42,12 @@ router.get('/facilities/:id/queues/:queue_id/cancel', function (req, res, next) 
 router.get('/facilities/:id/queues/:queue_id/customers/:customer_id/enqueue', function (req, res, next) {
   queueService.enqueueCustomer(req, res, next);
 });
+
+// enqueue a customer in queue 
+router.post('/facilities/:id/queues/:queue_id/enqueue', function (req, res, next) {
+  queueService.enqueueDummyCustomer(req, res, next);
+});
+
 router.get('/facilities/:id/queues/:queue_id/customers', function (req, res, next) {
   queueService.getAllQueueCustomers(req, res, next);
 });

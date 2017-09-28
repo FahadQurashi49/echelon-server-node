@@ -6,20 +6,6 @@ function CustomerService() {
 
 }
 
-function ignoreCustomerFeilds(customer) {
-    // do not serialize isInQueue, queueNumber of customer
-    if (customer) {
-        if (customer.isInQueue) {
-            delete customer.isInQueue;
-        }
-        if (customer.queueNumber) {
-            delete customer.queueNumber;
-        }
-        if (customer.queue) {
-            delete customer.queue;
-        }
-    }
-}
 // get a customer by ID
 CustomerService.prototype.getCustomer = function (req, res, next) {
     Customer.findById(req.params.id).then(function (customer) {
@@ -30,7 +16,7 @@ CustomerService.prototype.getCustomer = function (req, res, next) {
 // add a new customer
 CustomerService.prototype.addCustomer = function (req, res, next) {
     var customer = req.body;
-    ignoreCustomerFeilds(customer);
+    Customer.ignoreCustomerFeilds(customer);
     Customer.create(customer).then(function (savedCustomer) {
         res.json(savedCustomer);
     }).catch(next);
@@ -38,7 +24,7 @@ CustomerService.prototype.addCustomer = function (req, res, next) {
 // update a customer by ID
 CustomerService.prototype.updateCustomer = function (req, res, next) {
     var customer = req.body;
-    ignoreCustomerFeilds(customer);
+    Customer.ignoreCustomerFeilds(customer);
     Customer.findOneAndUpdate({ _id: req.params.id }, customer).then(function () {        
         Customer.findOne({ _id: req.params.id }).then(function (updatedCustomer) {
             customerException.customerNotFound(updatedCustomer);

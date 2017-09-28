@@ -16,6 +16,10 @@ const CustomerSchema = new Schema({
         type: Boolean,
         default: false
     },
+    isDummy: {
+        type: Boolean,
+        default: false
+    },
     // http://mongoosejs.com/docs/populate.html
     queue: { type: Schema.Types.ObjectId, ref: 'queue'}
 });
@@ -44,6 +48,25 @@ CustomerSchema.statics.findByQueueIdAndQueueNumber = function (queue, callback, 
         callback(customer);
     }).catch(next);
 }
+
+CustomerSchema.statics.ignoreCustomerFeilds = function (customer) {
+     // do not serialize isInQueue, queueNumber of customer
+     if (customer) {
+        if (customer.isInQueue) {
+            delete customer.isInQueue;
+        }
+        if (customer.queueNumber) {
+            delete customer.queueNumber;
+        }
+        if (customer.queue) {
+            delete customer.queue;
+        }
+        if (customer.isDummy) {
+            delete customer.isDummy;
+        }
+    }
+    return customer;
+};
 
 // unique composite column
 // https://stackoverflow.com/a/12574045/4233036
