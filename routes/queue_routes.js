@@ -9,9 +9,14 @@ router.get('/facilities/:id/queues', function (req, res, next) {
   queueService.getAllQueues(req, res, next);
 });
 
-// get a queue
+// get a queue by facility
 router.get('/facilities/:id/queues/:queue_id', function (req, res, next) {
   queueService.getQueue(req, res, next);
+});
+
+// get a queue by id
+router.get('/queues/:id', function (req, res, next) {
+  queueService.getQueueById(req, res, next);
 });
 
 // add a new queue

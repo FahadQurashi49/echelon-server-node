@@ -27,6 +27,13 @@ QueueService.prototype.getQueue = function (req, res, next) {
   }, next);
 }
 
+QueueService.prototype.getQueueById = function (req, res, next) {
+  Queue.findById(req.params.id).then(function (queue) {
+    queueExceptions.queueNotFound(queue);
+    res.json(queue);
+  }).catch(next);
+}
+
 QueueService.prototype.updateQueue = function (req, res, next) {
   Queue.findOneAndUpdate({
     _id: req.params.queue_id,
@@ -175,7 +182,7 @@ QueueService.prototype.getAllQueueCustomers = function (req, res, next) {
 
 // support functions
 
-
+// TODO: move this function to queue model
 var ignoreQueueFields = function (queue) {
   if (queue) {
     delete queue._id;
